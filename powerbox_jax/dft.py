@@ -1,4 +1,4 @@
-r"""
+"""
  A module defining some "nicer" fourier transform functions, this time in Jax.
 
  We define only two functions -- an arbitrary-dimension forward transform, and its inverse. In each case, the transform
