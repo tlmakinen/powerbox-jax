@@ -158,14 +158,14 @@ class PowerBox(object):
         #dk = np.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
 
         #freq = [fftfreq(n, d=d, b=self.fourier_b) for n, d in zip(_N, dk)]
-        _myfreq = lambda n,d: fftfreq(n, d=d, b=self.fourier_b)
+        _myfreq = lambda n,d: dft.fftfreq(n, d=d, b=self.fourier_b)
         freq = jax.tree_multimap(_myfreq, list(_N), list(dk))
         return freq, axes, left_edge
 
     @property
     def kvec(self):
         "The vector of wavenumbers along a side"
-        return fftfreq(self.N, d=self.dx, b=self.fourier_b)
+        return dft.fftfreq(self.N, d=self.dx, b=self.fourier_b)
 
     @property
     def r(self):
@@ -229,7 +229,7 @@ class PowerBox(object):
         # units of 1/V and we require a unitless quantity for delta_x.
         #dk = empty((self.N,) * self.dim, dtype='complex128')
         dk = self.delta_k()
-        dk = self.V * ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
+        dk = self.V * dft.ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                            a=self.fourier_a, b=self.fourier_b)[0]
         dk = np.real(dk)
 
@@ -323,7 +323,7 @@ class LogNormalPowerBox(PowerBox):
         "The correlation function from the input power, on the grid"
         #pa = np.empty((self.N,) * self.dim)
         pa = self.power_array()
-        return self.V * np.real(ifft(pa, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
+        return self.V * np.real(dft.ifft(pa, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                               a=self.fourier_a, b=self.fourier_b)[0])
 
     def gaussian_correlation_array(self):
@@ -334,7 +334,7 @@ class LogNormalPowerBox(PowerBox):
         "The power spectrum required for a Gaussian field to produce the input power on a lognormal field"
         #gca = np.empty((self.N,) * self.dim)
         gca = self.gaussian_correlation_array()
-        gpa = np.abs(fft(gca, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
+        gpa = np.abs(dft.fft(gca, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                                   a=self.fourier_a, b=self.fourier_b)[0])
 
         mask = (self.n // 2,)*self.dim #np.where(self.k() == 0)
@@ -359,7 +359,7 @@ class LogNormalPowerBox(PowerBox):
         "The real-space over-density field, from the input power spectrum"
         #dk = np.empty((self.N,) * self.dim, dtype='complex128')
         dk = self.delta_k()
-        dk = np.sqrt(self.V) * ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
+        dk = np.sqrt(self.V) * dft.ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                     a=self.fourier_a, b=self.fourier_b)[0]
         dk = np.real(dk)
 
