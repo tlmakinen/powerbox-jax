@@ -72,7 +72,7 @@ plt.imshow(lnpb.delta_x()[:, :],extent=(0,1,0,1))
 plt.colorbar()
 plt.show()
 ```
- <img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/fid-universe.png" alt="drawing" width="700"/>
+ <img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/fid-universe.png" alt="drawing" width="200"/>
 
 Next, we can check to see if the simulator is indeed incorporating the power spectrum that we specified (using the original `powerbox` `get_power` method):
 
@@ -84,7 +84,7 @@ plt.legend()
 plt.yscale('log')
 plt.xscale('log')
 ```
-<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/master/docs/pbox-pk.png" alt="drawing" width="700"/>
+<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/pbox-pk.png" alt="drawing" width="200"/>
 
 Finally, we can code a little wrapper for our gradient calculator:
 ```python
@@ -146,4 +146,4 @@ for a in ax:
 plt.show()
 
 ```
-<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/master/docs/diff-universe.png" alt="drawing" width="700"/>
+<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/diff-universe.png" alt="drawing" width="500"/>
