@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="SKIM",
+    name="powerbox_jax",
     version="0.10",
     author="Lucas Makinen",
     author_email="timothy.makinen@cfa.harvard.edu",
