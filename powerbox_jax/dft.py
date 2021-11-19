@@ -23,7 +23,7 @@
  one must be careful that the frequencies returned are descending, rather than ascending).
 """
 import warnings
-
+import jax.numpy as np
 from jax.numpy.fft import fftn, ifftn, ifftshift as _ifftshift, fftshift as _fftshift, fftfreq as _fftfreq
 
 # To avoid MKL-related bugs, numpy needs to be imported after pyfftw: see https://github.com/pyFFTW/pyFFTW/issues/40
