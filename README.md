@@ -72,6 +72,7 @@ plt.imshow(lnpb.delta_x()[:, :],extent=(0,1,0,1))
 plt.colorbar()
 plt.show()
 ```
+ <img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/master/docs/fid-universe.png" alt="drawing" width="700"/>
 
 Next, we can check to see if the simulator is indeed incorporating the power spectrum that we specified (using the original `powerbox` `get_power` method):
 
@@ -83,6 +84,7 @@ plt.legend()
 plt.yscale('log')
 plt.xscale('log')
 ```
+<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/master/docs/pbox-pk.png" alt="drawing" width="700"/>
 
 Finally, we can code a little wrapper for our gradient calculator:
 ```python
@@ -99,7 +101,7 @@ def simulator(key, θ):
     return lnpb.delta_x()
 ```
 
-and finally compute the gradients for this fiducial universe !
+and finally compute the gradients with respect to our two cosmological parameters for this fiducial universe !
 
 ```python
 θ_fid = np.array([0.3, 0.76])
@@ -144,3 +146,4 @@ for a in ax:
 plt.show()
 
 ```
+<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/master/docs/diff-universe.png" alt="drawing" width="700"/>
