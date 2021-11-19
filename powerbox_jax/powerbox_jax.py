@@ -151,7 +151,7 @@ class PowerBox(object):
         Lk = 2 * np.pi / (dx * self.fourier_b)
 
         Lk = np.array(Lk)
-        left_edge = _set_left_edge(None, axes, Lk)
+        left_edge = dft._set_left_edge(None, axes, Lk)
 
         V = np.product(Lk)
         dk = np.array(Lk) / np.array(_N)
