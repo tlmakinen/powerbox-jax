@@ -13,7 +13,7 @@ setuptools.setup(
     in Jax.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/tlmakinen/powerbox-jax.git",
+    url="git@github.com:tlmakinen/powerbox-jax.git",
     packages=["powerbox_jax"],
     classifiers=[
         "Programming Language :: Python :: 3.7",
