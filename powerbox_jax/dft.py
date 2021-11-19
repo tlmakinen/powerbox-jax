@@ -1,4 +1,4 @@
- r"""
+r"""
  A module defining some "nicer" fourier transform functions, this time in Jax.
 
  We define only two functions -- an arbitrary-dimension forward transform, and its inverse. In each case, the transform
@@ -21,7 +21,7 @@
 
  We note that currently, only positive values for b are implemented (in fact, using negative b is consistent, but
  one must be careful that the frequencies returned are descending, rather than ascending).
- """
+"""
 import warnings
 
 from jax.numpy.fft import fftn, ifftn, ifftshift as _ifftshift, fftshift as _fftshift, fftfreq as _fftfreq
