@@ -14,7 +14,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/tlmakinen/powerbox-jax.git",
-    packages=["SKIM"],
+    packages=["powerbox_jax"],
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "License :: Apache License",
