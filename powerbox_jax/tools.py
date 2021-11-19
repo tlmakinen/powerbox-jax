@@ -5,6 +5,7 @@ A set of tools for dealing with structured boxes, such as those output by :mod:`
 for averaging a field angularly, and generating the isotropic power spectrum.
 """
 from . import dft
+import jax
 import jax.numpy as np
 import warnings
 

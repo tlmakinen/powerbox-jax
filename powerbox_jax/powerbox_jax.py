@@ -4,7 +4,7 @@ produces *Gaussian* fields, and the other *LogNormal* fields.
 In principle, these may be extended to other 1-point density distributions by subclassing :class:`PowerBox` and
 over-writing the same methods as are over-written in :class:`LogNormalPowerBox`.
 """
-
+import jax
 import jax.numpy as np
 from . import dft
 from .tools import _magnitude_grid

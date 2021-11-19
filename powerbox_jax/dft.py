@@ -23,6 +23,7 @@
  one must be careful that the frequencies returned are descending, rather than ascending).
 """
 import warnings
+import jax
 import jax.numpy as np
 from jax.numpy.fft import fftn, ifftn, ifftshift as _ifftshift, fftshift as _fftshift, fftfreq as _fftfreq
 
