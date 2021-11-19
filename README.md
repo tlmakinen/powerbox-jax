@@ -84,7 +84,7 @@ plt.legend()
 plt.yscale('log')
 plt.xscale('log')
 ```
-<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/pbox-pk.png" alt="drawing" width="200"/>
+<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/pbox-pk.png" alt="drawing" width="500"/>
 
 Finally, we can code a little wrapper for our gradient calculator:
 ```python
