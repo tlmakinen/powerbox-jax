@@ -150,4 +150,4 @@ plt.show()
 ![alt text](https://github.com/tlmakinen/powerbox-jax/blob/main/diff-universe.png | width=100)
 
 
-<img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/docs/diff-universe.png" alt="drawing" width="700"/>
+<img src="https://github.com/tlmakinen/powerbox-jax/tree/main/docs/diff-universe.png" alt="drawing" width="700"/>
