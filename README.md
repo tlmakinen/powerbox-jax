@@ -13,7 +13,7 @@ For installation on the command line or Colab, call
 
 
 ## example: generate a differentiable mock dark matter field
-In computational cosmology it is of interest to take gradients of cosmological *fields* with respect to underlying global parameters. Doing so lets us efficiently calculate information content and train neural networks via gradient descent (see e.g.https://arxiv.org/abs/2107.07405 ).
+In computational cosmology it is of interest to take gradients of cosmological *fields* with respect to underlying global parameters. Doing so lets us efficiently calculate information content and train neural networks via gradient descent (see https://arxiv.org/abs/2107.07405).
 
 For this example we'll need to install the `imnn` and `jax-cosmo` packages:
 
@@ -43,7 +43,7 @@ from powerbox_jax.dft import _set_left_edge, fftfreq
 # for get_power function
 import powerbox as pbox
 ```
-Next, let's define a (differentiable !) cosmological power spectrum using (`jax-cosmo`)[https://github.com/DifferentiableUniverseInitiative/jax_cosmo]. We're going to vary two parameters for our universe, <img src="https://render.githubusercontent.com/render/math?math=\Omega_c"> and src="https://render.githubusercontent.com/render/math?math=\sigma_8">.
+Next, let's define a (differentiable !) cosmological power spectrum using [`jax-cosmo`](https://github.com/DifferentiableUniverseInitiative/jax_cosmo). We're going to vary two parameters for our universe, <img src="https://render.githubusercontent.com/render/math?math=\Omega_c"> and src="https://render.githubusercontent.com/render/math?math=\sigma_8">.
 
 ```python
 # define cosmology
