@@ -42,7 +42,7 @@ from powerbox_jax.dft import _set_left_edge, fftfreq
 # for get_power function
 import powerbox as pbox
 ```
-Next, let's define a (differentiable !) cosmological power spectrum using `jax-cosmo`:
+Next, let's define a (differentiable !) cosmological power spectrum using `jax-cosmo`. We're going to vary two parameters for our universe, <img src="https://render.githubusercontent.com/render/math?math=\Omega_c"> and src="https://render.githubusercontent.com/render/math?math=\sigma_8">.
 
 ```python
 # define cosmology
@@ -50,7 +50,7 @@ cosmo_params = jc.Planck15(Omega_c=0.4, sigma8=0.6)
 θ_fid = np.array(
     [cosmo_params.Omega_c,
      cosmo_params.sigma8],
-    dtype=np.float64)
+    dtype=np.float32)
 
 # define power spectrum
 def P(k, A=0.40, B=0.60):
@@ -63,13 +63,16 @@ Next we'll choose a Jax `PRNGKey` and create a `LogNormalPowerBox` object:
 ```python
 rng = jax.random.PRNGKey(32)
 
+N = 128.
+L = 250. # Mpc
+
 lnpb = pbj.LogNormalPowerBox(
-    N=128,                     # Number of grid-points in the box
-    dim=2,                     # 2D box
-    pk = lambda k: P(k, A=0.3, B=0.8) / 250, # The power-spectrum
-    boxlength = 250.0,           # Size of the box (sets the units of k in pk)
-    key = rng,                # Use the same seed as our powerbox
-    vol_normalised_power=True,
+    N=N,                                   # Number of grid-points in the box
+    dim=2,                                 # 2D box
+    pk = lambda k: P(k, A=0.3, B=0.8) / L, # The power-spectrum
+    boxlength = L,                         # Size of the box (sets the units of k in pk)
+    key = rng,                             # specify Jax PRNGKey
+    vol_normalised_power=True,             # normalise power by volume
     supplied_freqs=None
 )
 plt.imshow(lnpb.delta_x()[:, :],extent=(0,1,0,1))
@@ -91,7 +94,7 @@ plt.xscale('log')
 
 ![pbox-pk](images/pbox-pk.png)
 
-Finally, we can code a little wrapper for our gradient calculator:
+Nex, we can code a little wrapper for our gradient calculator:
 ```python
 def simulator(key, θ):
     A,B = θ
@@ -112,12 +115,13 @@ and finally compute the gradients with respect to our two cosmological parameter
 # new random key
 key,rng = jax.random.split(rng)
 
-
 def simulator_gradient(rng, θ):
     return value_and_jacrev(simulator, argnums=1, allow_int=True, holomorphic=True)(rng, θ)
 
 simulation, simulation_gradient = value_and_jacfwd(simulator, argnums=1)(rng, θ_fid)
 cmap = 'viridis'
+
+# some plotting stuff
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 fig,ax = plt.subplots(nrows=1, ncols=3, figsize=(12,15))
