@@ -147,7 +147,7 @@ for a in ax:
 plt.show()
 
 ```
-![alt text](https://github.com/tlmakinen/powerbox-jax/blob/main/diff-universe.png | width=100)
+![alt text](https://github.com/tlmakinen/powerbox-jax/tree/main/docs/diff-universe.png | width=100)
 
 
 <img src="https://github.com/tlmakinen/powerbox-jax/tree/main/docs/diff-universe.png" alt="drawing" width="700"/>
