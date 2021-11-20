@@ -29,10 +29,13 @@ from jax import grad, jit, vmap
 from jax import random
 import jax
 
+# for getting gradients
 from imnn.utils import value_and_jacrev, value_and_jacfwd
 
+# for the power spectrum
 import jax_cosmo as jc
 
+# powerbox-jax import
 import powerbox_jax as pbj
 from powerbox_jax.dft import _set_left_edge, fftfreq
 
@@ -86,7 +89,7 @@ plt.yscale('log')
 plt.xscale('log')
 ```
 
-![pbox-pk](images/pbox-pk.png | width=500)
+![pbox-pk](images/pbox-pk.png)
 
 Finally, we can code a little wrapper for our gradient calculator:
 ```python
@@ -106,8 +109,7 @@ def simulator(key, θ):
 and finally compute the gradients with respect to our two cosmological parameters for this fiducial universe !
 
 ```python
-θ_fid = np.array([0.3, 0.76])
-
+# new random key
 key,rng = jax.random.split(rng)
 
 
