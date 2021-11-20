@@ -73,7 +73,8 @@ plt.imshow(lnpb.delta_x()[:, :],extent=(0,1,0,1))
 plt.colorbar()
 plt.show()
 ```
- <img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/images/fid-universe.png" alt="drawing" width="700"/>
+<!--  <img src="https://raw.githubusercontent.com/tlmakinen/powerbox-jax/blob/main/images/fid-universe.png" alt="drawing" width="700"/> -->!
+![fid-universe](images/fid-universe.png)
 
 Next, we can check to see if the simulator is indeed incorporating the power spectrum that we specified (using the original `powerbox` `get_power` method):
 
