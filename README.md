@@ -82,7 +82,7 @@ plt.show()
 ```
 ![fid-universe](images/fid-universe.png)
 
-Next, we can check to see if the simulator is indeed incorporating the power spectrum that we specified (using the original `powerbox` `get_power` method):
+Next, we can check to see if the simulator is indeed incorporating the power spectrum that we specified (using the original `powerbox` `get_power()` method):
 
 ```python
 p_k_lnfield, bins_lnfield = pbox.get_power(lnpb.delta_x(), lnpb.boxlength)
