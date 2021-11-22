@@ -101,11 +101,11 @@ def simulator(key, θ):
     A,B = θ
     
     lnpb = pbj.LogNormalPowerBox(
-        N=128,                     # Number of grid-points in the box
-        dim=2,                     # 2D box
+        N=128,                                # Number of grid-points in the box
+        dim=2,                                # 2D box
         pk = lambda k: P(k, A=A, B=B) / 250., # The power-spectrum
-        boxlength = 250.0,           # Size of the box (sets the units of k in pk)
-        key = key                # Use the same seed as our powerbox
+        boxlength = 250.0,                    # Size of the box (sets the units of k in pk)
+        key = key                             # Use the same seed as our powerbox
     )
     return lnpb.delta_x()
 ```
