@@ -2,7 +2,7 @@
 "`powerbox` + `Jax` ... like PB&J, an ideal combo"
 
 Jax implementation of [`powerbox`](https://github.com/steven-murray/powerbox) for autodifferentiability.
- `powerbox-jax` is functionally equivalent to `powerbox`, but is now fully differentiable and XLA-compatible !
+ `powerbox-jax` is functionally equivalent to `powerbox`, but is now *fully differentiable and XLA-compatible* !
  
 ![diff-universe](images/diff-universe.png)
 
