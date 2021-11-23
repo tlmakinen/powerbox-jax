@@ -122,9 +122,12 @@ def simulator_gradient(rng, θ):
     return value_and_jacrev(simulator, argnums=1, allow_int=True, holomorphic=True)(rng, θ)
 
 simulation, simulation_gradient = value_and_jacfwd(simulator, argnums=1)(rng, θ_fid)
+```
+
+```python
+# some plotting stuff
 cmap = 'viridis'
 
-# some plotting stuff
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 fig,ax = plt.subplots(nrows=1, ncols=3, figsize=(12,15))
