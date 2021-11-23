@@ -17,7 +17,7 @@ For installation on the command line or Colab, call
 ## example: generate a differentiable mock dark matter field
 In computational cosmology it is of interest to take gradients of cosmological *fields* with respect to underlying global parameters. Doing so lets us efficiently calculate information content and train neural networks via gradient descent (see https://arxiv.org/abs/2107.07405).
 
-For this example we'll need to install the `imnn` and `jax-cosmo` packages:
+For this example we'll need to install the [`imnn`](https://www.aquila-consortium.org/doc/imnn/index.html) and [`jax-cosmo`](https://github.com/DifferentiableUniverseInitiative/jax_cosmo) packages:
 
 `pip install imnn`
 
