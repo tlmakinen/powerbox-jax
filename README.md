@@ -118,6 +118,7 @@ and finally compute the gradients with respect to our two cosmological parameter
 # new random key
 key,rng = jax.random.split(rng)
 
+# get simulation and each gradient
 def simulator_gradient(rng, θ):
     return value_and_jacrev(simulator, argnums=1, allow_int=True, holomorphic=True)(rng, θ)
 
@@ -125,7 +126,7 @@ simulation, simulation_gradient = value_and_jacfwd(simulator, argnums=1)(rng, θ
 ```
 
 ```python
-# some plotting stuff
+# make a nice plot
 cmap = 'viridis'
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
