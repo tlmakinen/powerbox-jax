@@ -142,7 +142,6 @@ class PowerBox(object):
         # set frequencies for jittable fft calculation
 
         axes = list(range(len(self.shape)))
-        print('axes: ', axes)
         _N = np.array([self.shape[axis] for axis in axes])
 
         # Get the box volume if given the real-space box volume
