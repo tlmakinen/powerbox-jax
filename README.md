@@ -163,6 +163,10 @@ plt.show()
 ```
 ![diff-universe](images/diff-universe.png)
 
+## Citing powerbox-jax
+
+To cite this repository:
+
 ```
 @software{pbox_jax2021,
   author = {T. Lucas Makinen* and Steven Murray*},
@@ -172,3 +176,4 @@ plt.show()
   year = {2020},
 }
 ```
+Additionally, please also cite the original [`powerbox`](https://github.com/steven-murray/powerbox) implementation here: https://github.com/steven-murray/powerbox
