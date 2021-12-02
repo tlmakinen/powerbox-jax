@@ -170,7 +170,7 @@ To cite this repository:
 ```
 @software{pbox_jax2021,
   author = {T. Lucas Makinen* and Steven Murray*},
-  title = {{powerbox-jax}: {A} {powerbox}, but in jax.},
+  title = {{powerbox-jax}: {powerbox}, but in jax.},
   url = {http://github.com/tlmakinen/powerbox-jax},
   version = {0.0.1.dev},
   year = {2020},
