@@ -173,7 +173,7 @@ To cite this repository:
   title = {{powerbox-jax}: {powerbox}, but in jax.},
   url = {http://github.com/tlmakinen/powerbox-jax},
   version = {0.0.1.dev},
-  year = {2020},
+  year = {2021},
 }
 ```
 Additionally, please also cite the original [`powerbox`](https://github.com/steven-murray/powerbox) implementation here: https://github.com/steven-murray/powerbox
