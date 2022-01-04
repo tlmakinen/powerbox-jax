@@ -152,7 +152,7 @@ class PowerBox(object):
         #dk = np.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
 
         #freq = [fftfreq(n, d=d, b=self.fourier_b) for n, d in zip(_N, dk)]
-        _myfreq = lambda n,d: dft.fftfreq(n, d=d, b=self.fourier_b)
+        _myfreq = lambda n,d: dft.fftfreq(n.item(), d=d, b=self.fourier_b)
         freq = jax.tree_multimap(_myfreq, list(_N), list(dk))
         return freq, axes, left_edge
 
@@ -173,9 +173,11 @@ class PowerBox(object):
 
     def gauss_hermitian(self):
         "A random array which has Gaussian magnitudes and Hermitian symmetry"
-
-        mag = numpyro.sample('gauss_hermitian_mag', dist.Normal(np.zeros(self.n), np.ones(self.n)))
-        pha = numpyro.sample('gauss_hermitian_pha', dist.Uniform(np.zeros(self.n), 2 * np.pi * np.ones(self.n)))
+        shape = (self.n,) * self.dim
+        mag = numpyro.sample('gauss_hermitian_mag', dist.Normal(np.zeros(shape), 
+                                                                np.ones(shape)))
+        pha = numpyro.sample('gauss_hermitian_pha', dist.Uniform(np.zeros(shape), 
+                                                                 2 * np.pi * np.ones(shape)))
 
         dk = _make_hermitian(mag, pha)
 
@@ -310,7 +312,7 @@ class LogNormalPowerBox(PowerBox):
     """
 
     def __init__(self, *args, **kwargs):
-        super(LogNormalPowerBox, self).__init__(*args, **kwargs)
+        super(self.__class__, self).__init__(*args, **kwargs)
 
     def correlation_array(self):
         "The correlation function from the input power, on the grid"
