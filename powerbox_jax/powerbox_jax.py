@@ -152,8 +152,8 @@ class PowerBox(object):
         #dk = np.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
 
         #freq = [fftfreq(n, d=d, b=self.fourier_b) for n, d in zip(_N, dk)]
-        _myfreq = lambda n,d: dft.fftfreq(n.item(), d=d, b=self.fourier_b)
-        freq = jax.tree_multimap(_myfreq, list(_N), list(dk))
+        _myfreq = lambda n,d: dft.fftfreq(n, d=d, b=self.fourier_b)
+        freq = jax.tree_multimap(_myfreq, list(self.shape), list(dk))
         return freq, axes, left_edge
 
     @property
