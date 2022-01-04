@@ -212,8 +212,9 @@ class PowerBox(object):
         "A realisation of the delta_k, i.e. the gaussianised square root of the power spectrum (i.e. the Fourier co-efficients)"
         p = self.power_array()
 
-        if np.any(p < 0):
-            raise ValueError("The power spectrum function has returned negative values.")
+        # Commented because not jittable
+        # if np.any(p < 0):
+        #     raise ValueError("The power spectrum function has returned negative values.")
 
         gh = self.gauss_hermitian()
 
