@@ -174,10 +174,12 @@ class PowerBox(object):
     def gauss_hermitian(self):
         "A random array which has Gaussian magnitudes and Hermitian symmetry"
         shape = (self.n,) * self.dim
-        mag = numpyro.sample('gauss_hermitian_mag', dist.Normal(np.zeros(shape), 
-                                                                np.ones(shape)))
-        pha = numpyro.sample('gauss_hermitian_pha', dist.Uniform(np.zeros(shape), 
-                                                                 2 * np.pi * np.ones(shape)))
+        mag = numpyro.sample('gauss_hermitian_mag', dist.Independent(dist.Normal(np.zeros(shape), 
+                                                                                np.ones(shape)) ,
+                                                                     self.dim))
+        pha = numpyro.sample('gauss_hermitian_pha', dist.Independent(dist.Uniform(np.zeros(shape), 
+                                                                 2 * np.pi * np.ones(shape)),
+                                                                     self.dim))
 
         dk = _make_hermitian(mag, pha)
 
