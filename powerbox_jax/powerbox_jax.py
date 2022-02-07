@@ -139,7 +139,7 @@ class PowerBox(object):
 
 
     def get_freqs(self):
-        "set frequencies for jittable fft calculation" 
+        "set frequencies for jittable fft calculation"
 
         axes = list(range(len(self.shape)))
         _N = np.array([self.shape[axis] for axis in axes])
@@ -193,11 +193,11 @@ class PowerBox(object):
         "The Power Spectrum (volume normalised) at `self.k`"
         k = self.k()
         mask = (self.n // 2,)*self.dim #np.where(k == 0)
-        
+
         # replace monopole mode with one for stability
         k = k.at[mask].set(np.array(1.))
         k = self.pk(k)
-        
+
         # replace monopole mode with zero
         k = k.at[mask].set(np.array(0.))
         return k
@@ -206,12 +206,12 @@ class PowerBox(object):
         "A realisation of the delta_k, i.e. the gaussianised square root of the power spectrum (i.e. the Fourier co-efficients)"
         p = self.power_array()
 
-        if np.any(p < 0):
-            raise ValueError("The power spectrum function has returned negative values.")
-        
+        #if np.any(p < 0):
+        #    raise ValueError("The power spectrum function has returned negative values.")
+
         # here we mask out the monopole so that the derivatives of p(k)
         # stay stable when we set p(k=0)=0.
-        
+
         mask = (self.n // 2,)*self.dim
         p = p.at[mask].set(np.array(1.))
         p = np.sqrt(p)
