@@ -6,8 +6,8 @@ over-writing the same methods as are over-written in :class:`LogNormalPowerBox`.
 """
 import jax
 import jax.numpy as np
-from . import dft
-from .tools import _magnitude_grid
+from powerbox_jax import dft
+from powerbox_jax.tools import _magnitude_grid
 
 
 def _make_hermitian(mag, pha):
@@ -139,7 +139,7 @@ class PowerBox(object):
 
 
     def get_freqs(self):
-        # set frequencies for jittable fft calculation
+        "set frequencies for jittable fft calculation" 
 
         axes = list(range(len(self.shape)))
         _N = np.array([self.shape[axis] for axis in axes])
@@ -154,9 +154,7 @@ class PowerBox(object):
 
         V = np.product(Lk)
         dk = np.array(Lk) / np.array(_N)
-        #dk = np.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
 
-        #freq = [fftfreq(n, d=d, b=self.fourier_b) for n, d in zip(_N, dk)]
         _myfreq = lambda n,d: dft.fftfreq(n, d=d, b=self.fourier_b)
         freq = jax.tree_multimap(_myfreq, list(_N), list(dk))
         return freq, axes, left_edge
@@ -195,19 +193,13 @@ class PowerBox(object):
         "The Power Spectrum (volume normalised) at `self.k`"
         k = self.k()
         mask = (self.n // 2,)*self.dim #np.where(k == 0)
+        
         # replace monopole mode with one for stability
-        k = jax.ops.index_update(
-                                k,
-                                jax.ops.index[mask],
-                                np.array(1.)
-                        )
+        k = k.at[mask].set(np.array(1.))
         k = self.pk(k)
+        
         # replace monopole mode with zero
-        k = jax.ops.index_update(
-                        k,
-                        jax.ops.index[mask],
-                        np.array(0.)
-                )
+        k = k.at[mask].set(np.array(0.))
         return k
 
     def delta_k(self):
@@ -216,17 +208,23 @@ class PowerBox(object):
 
         if np.any(p < 0):
             raise ValueError("The power spectrum function has returned negative values.")
+        
+        # here we mask out the monopole so that the derivatives of p(k)
+        # stay stable when we set p(k=0)=0.
+        
+        mask = (self.n // 2,)*self.dim
+        p = p.at[mask].set(np.array(1.))
+        p = np.sqrt(p)
+        p = p.at[mask].set(np.array(0.))
 
         gh = self.gauss_hermitian()
-
-        gh = np.sqrt(p) * gh
+        gh *= p
         return gh
 
     def delta_x(self):
         "The realised field in real-space from the input power spectrum"
         # Here we multiply by V because the (inverse) fourier-transform of the (dimensionless) power has
         # units of 1/V and we require a unitless quantity for delta_x.
-        #dk = empty((self.N,) * self.dim, dtype='complex128')
         dk = self.delta_k()
         dk = self.V * dft.ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                            a=self.fourier_a, b=self.fourier_b)[0]
@@ -263,7 +261,7 @@ class PowerBox(object):
         dx = self.delta_x()
         dx = (dx + 1) * self.dx ** self.dim * nbar
         n = dx
-        self.n_per_cell = jax.random.poisson(key, n)
+        self.n_per_cell = jax.random.poisson(key, n.flatten(), shape=n.flatten().shape)
 
         # Get all source positions
         args = [self.x] * self.dim
@@ -320,7 +318,6 @@ class LogNormalPowerBox(PowerBox):
 
     def correlation_array(self):
         "The correlation function from the input power, on the grid"
-        #pa = np.empty((self.N,) * self.dim)
         pa = self.power_array()
         return self.V * np.real(dft.ifft(pa, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                               a=self.fourier_a, b=self.fourier_b)[0])
@@ -331,17 +328,13 @@ class LogNormalPowerBox(PowerBox):
 
     def gaussian_power_array(self):
         "The power spectrum required for a Gaussian field to produce the input power on a lognormal field"
-        #gca = np.empty((self.N,) * self.dim)
         gca = self.gaussian_correlation_array()
         gpa = np.abs(dft.fft(gca, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                                   a=self.fourier_a, b=self.fourier_b)[0])
 
-        mask = (self.n // 2,)*self.dim #np.where(self.k() == 0)
+        mask = (self.n // 2,)*self.dim
+        gpa = gpa.at[mask].set(np.array(1e-12))
 
-        gpa = jax.ops.index_update(
-                                gpa,
-                                jax.ops.index[mask],
-                                np.array(1e-12))
         return gpa
 
     def delta_k(self):
@@ -356,7 +349,6 @@ class LogNormalPowerBox(PowerBox):
 
     def delta_x(self):
         "The real-space over-density field, from the input power spectrum"
-        #dk = np.empty((self.N,) * self.dim, dtype='complex128')
         dk = self.delta_k()
         dk = np.sqrt(self.V) * dft.ifft(dk, L=self.boxlength, freq=self.freqs, left_edge=self.left_edge,
                                     a=self.fourier_a, b=self.fourier_b)[0]
