@@ -27,6 +27,7 @@ setuptools.setup(
           "tqdm>=4.48.2",
           "numpy>=1.16.0",
           "scipy>=1.4.1",
+          "numpyro",
           "corner",
           "matplotlib"],
 )
