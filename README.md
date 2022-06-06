@@ -118,11 +118,14 @@ and finally compute the gradients with respect to our two cosmological parameter
 # new random key
 key,rng = jax.random.split(rng)
 
-# get simulation and each gradient
-def simulator_gradient(rng, θ):
-    return value_and_jacrev(simulator, argnums=1, allow_int=True, holomorphic=True)(rng, θ)
+# get simulation and each gradient; freeze at given random key
+mysim = lambda θ: simulator(rng, θ)
 
-simulation, simulation_gradient = value_and_jacfwd(simulator, argnums=1)(rng, θ_fid)
+def simulator_gradient(rng, θ):
+    return value_and_jacrev(mysim, argnums=0, allow_int=True, holomorphic=True)(θ)
+
+simulation, simulation_gradient = value_and_jacfwd(mysim, argnums=0)(θ_fid)
+
 ```
 
 ```python
