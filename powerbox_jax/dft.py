@@ -219,7 +219,7 @@ def _retfunc(ft, freq, axes, ret_cubegrid):
     else:
         grid = freq[0] ** 2
         for i in range(1, len(axes)):
-            grid = np.add.outer(grid, freq[i] ** 2)
+            grid = np.outer(grid, freq[i] ** 2)
 
         return ft, freq, np.sqrt(grid)
 
