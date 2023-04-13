@@ -282,7 +282,8 @@ def angular_average_nd(field, coords, bins, n=None, weights=1, average=True, bin
         return res.reshape((len(sumweights),) + field.shape[n:]), bins, var
 
 
-def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotnoise=True,
+
+def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, freq=None, a=1., b=1., remove_shotnoise=True,
               vol_normalised_power=True, bins=None, res_ndim=None, weights=None, weights2=None,
               dimensionless=True, bin_ave=True, get_variance=False, log_bins=False, ignore_zero_mode=False,
               k_weights = 1,
@@ -300,13 +301,17 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
         is a discrete sampling of a field. This function chooses which to use by checking the value of `N` (see below).
         Note that if a discrete sampling is used, the power spectrum calculated is the
         "overdensity" power spectrum, i.e. the field re-centered about zero and rescaled by the mean.
-    boxlength : float or list of floats
+    boxlength : array of floats
         The length of the box side(s) in real-space.
+    N: array-like, optional
+        Must be provided as jnp.array(deltax.shape) to allow this function to be jittable 
     deltax2 : array-like
         If given, a box of the same shape as deltax, against which deltax will be cross correlated.
-    N : int, optional
+    Ndiscrete : int, optional
         The number of grid cells per side in the box. Only required if deltax is a discrete sample. If given,
         the function will assume a discrete sample.
+    freq: array-like
+        The frequency wavenumbers over which to perform the FFT. Providing them allows this function to be jittable in Jax.
     a,b : float, optional
         These define the Fourier convention used. See :mod:`powerbox.dft` for details. The defaults define the standard
         usage in *cosmology* (for example, as defined in Cosmological Physics, Peacock, 1999, pg. 496.). Standard
@@ -319,7 +324,6 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
     bins : int or array, optional
         Defines the final k-bins output. If None, chooses a number based on the input resolution of the box. Otherwise,
         if int, this defines the number of kbins, or if an array, it defines the exact bin edges.
-
     res_ndim : int, optional
         Only perform angular averaging over first `res_ndim` dimensions. By default, uses all dimensions.
     weights, weights2 : array-like, optional
@@ -361,7 +365,7 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
     """
 
     # Check if the input data is in sampled particle format
-    if N is not None:
+    if Ndiscrete is not None:
 
         if deltax.shape[1] > deltax.shape[0]:
             raise ValueError("It seems that there are more dimensions than particles! Try transposing deltax.")
@@ -375,9 +379,10 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
 
         if not np.iterable(N):
             N = [N] * dim
+        
+        N = np.array(N)
 
-        if not np.iterable(boxlength):
-            boxlength = [boxlength] * dim
+        boxlength = np.array(boxlength)
 
         Npart1 = deltax.shape[0]
 
@@ -405,7 +410,10 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
                 deltax2 -= np.mean(deltax2)
     else:
         # If input data is already a density field, just get the dimensions.
-        dim = len(deltax.shape)
+        if dim is None:
+            dim = len(deltax.shape)
+        else:
+            dim = dim
 
         if not np.iterable(boxlength):
             boxlength = [boxlength] * dim
@@ -413,16 +421,17 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
         if deltax2 is not None and deltax.shape != deltax2.shape:
             raise ValueError("deltax and deltax2 must have the same shape!")
 
-        N = deltax.shape
+        if N is None:
+            N = np.array(deltax.shape)
         Npart1 = None
 
     V = np.product(boxlength)
 
     # Calculate the n-D power spectrum and align it with the k from powerbox.
-    FT, freq, k = fft(deltax, L=boxlength, a=a, b=b, ret_cubegrid=True)
+    FT, freq, k = fft(deltax, L=boxlength, freq=freq, a=a, b=b, ret_cubegrid=True)
 
     if deltax2 is not None:
-        FT2 = fft(deltax2, L=boxlength, a=a, b=b)[0]
+        FT2 = fft(deltax2, L=boxlength, freq=freq, a=a, b=b)[0]
     else:
         FT2 = FT
 
@@ -436,7 +445,7 @@ def get_power(deltax, boxlength, deltax2=None, N=None, a=1., b=1., remove_shotno
 
     # Determine a nice number of bins.
     if bins is None:
-        bins = int(np.product(N[:res_ndim]) ** (1. / res_ndim) / 2.2)
+        bins = (np.product(N[:res_ndim]) ** (1. / res_ndim) / 2.2).astype(int)
 
     # Set k_weights so that k=0 mode is ignore if desired.
     if ignore_zero_mode:
