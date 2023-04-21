@@ -428,10 +428,10 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
     V = np.product(boxlength)
 
     # Calculate the n-D power spectrum and align it with the k from powerbox.
-    FT, freq, k = fft(deltax, L=boxlength, freq=freq, a=a, b=b, ret_cubegrid=True)
+    FT, freq, k = dft.fft(deltax, L=boxlength, freq=freq, a=a, b=b, ret_cubegrid=True)
 
     if deltax2 is not None:
-        FT2 = fft(deltax2, L=boxlength, freq=freq, a=a, b=b)[0]
+        FT2 = dft.fft(deltax2, L=boxlength, freq=freq, a=a, b=b)[0]
     else:
         FT2 = FT
 
