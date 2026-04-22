@@ -24,13 +24,13 @@
 """
 import warnings
 import jax
-import jax.numpy as np
+import jax.numpy as jnp
 from jax.numpy.fft import fftn, ifftn, ifftshift as _ifftshift, fftshift as _fftshift, fftfreq as _fftfreq
 
 # To avoid MKL-related bugs, numpy needs to be imported after pyfftw: see https://github.com/pyFFTW/pyFFTW/issues/40
 
 
-def fft(X, L=None, Lk=None, freq=None, a=0, b=2 * np.pi, left_edge=None, axes=None, ret_cubegrid=False):
+def fft(X, L=None, Lk=None, freq=None, a=0, b=2 * jnp.pi, left_edge=None, axes=None, ret_cubegrid=False):
     r"""
     Arbitrary-dimension nice Fourier Transform.
     This function wraps numpy's ``fftn`` and applies some nice properties. Notably, the returned fourier transform
@@ -76,38 +76,38 @@ def fft(X, L=None, Lk=None, freq=None, a=0, b=2 * np.pi, left_edge=None, axes=No
     if axes is None:
         axes = list(range(len(X.shape)))
 
-    N = np.array([X.shape[axis] for axis in axes])
+    N = jnp.array([X.shape[axis] for axis in axes])
 
     # Get the box volume if given the fourier-space box volume
     if L is None and Lk is None:
         L = N
     elif L is not None:  # give precedence to L
-        if np.isscalar(L):
-            L = L * np.ones(len(axes))
+        if jnp.isscalar(L):
+            L = L * jnp.ones(len(axes))
     elif Lk is not None:
-        if np.isscalar(Lk):
-            Lk = Lk * np.ones(len(axes))
-        L = N * 2 * np.pi / (Lk * b)  # Take account of the fourier convention.
+        if jnp.isscalar(Lk):
+            Lk = Lk * jnp.ones(len(axes))
+        L = N * 2 * jnp.pi / (Lk * b)  # Take account of the fourier convention.
 
     left_edge = _set_left_edge(left_edge, axes, L)
 
-    L = np.array(L)
-    V = np.product(L)  # Volume of box
-    Vx = V / np.product(N)  # Volume of cell
+    L = jnp.array(L)
+    V = jnp.prod(L)  # Volume of box
+    Vx = V / jnp.prod(N)  # Volume of cell
 
-    ft = Vx * fftshift(fftn(X, axes=axes), axes=axes) * np.sqrt(np.abs(b) / (2 * np.pi) ** (1 - a)) ** len(axes)
+    ft = Vx * fftshift(fftn(X, axes=axes), axes=axes) * jnp.sqrt(jnp.abs(b) / (2 * jnp.pi) ** (1 - a)) ** len(axes)
 
-    dx = np.array(L) / np.array(N)
+    dx = jnp.array(L) / jnp.array(N)
 
     if freq is None:
-      freq = np.array([fftfreq(n, d=d, b=b) for n, d in zip(N, dx)])
+      freq = jnp.array([fftfreq(n, d=d, b=b) for n, d in zip(N, dx)])
 
     # Adjust phases of the result to align with the left edge properly.
     ft = _adjust_phase(ft, left_edge, freq, axes, b)
     return _retfunc(ft, freq, axes, ret_cubegrid)
 
 
-def ifft(X, Lk=None, L=None, freq=None, a=0, b=2 * np.pi, axes=None, left_edge=None, ret_cubegrid=False):
+def ifft(X, Lk=None, L=None, freq=None, a=0, b=2 * jnp.pi, axes=None, left_edge=None, ret_cubegrid=False):
     r"""
     Arbitrary-dimension nice inverse Fourier Transform.
     This function wraps numpy's ``ifftn`` and applies some nice properties. Notably, the returned fourier transform
@@ -155,36 +155,36 @@ def ifft(X, Lk=None, L=None, freq=None, a=0, b=2 * np.pi, axes=None, left_edge=N
     if axes is None:
         axes = list(range(len(X.shape)))
 
-    N = np.array([X.shape[axis] for axis in axes])
+    N = jnp.array([X.shape[axis] for axis in axes])
 
     # Get the box volume if given the real-space box volume
     if Lk is None and L is None:
         Lk = 1
     elif L is not None:
-        if np.isscalar(L):
-            L = np.array([L] * len(axes))
+        if jnp.isscalar(L):
+            L = jnp.array([L] * len(axes))
 
         dx = L / N
-        Lk = 2 * np.pi / (dx * b)
+        Lk = 2 * jnp.pi / (dx * b)
 
-    elif np.isscalar(Lk):
+    elif jnp.isscalar(Lk):
         Lk = [Lk] * len(axes)
 
-    Lk = np.array(Lk)
+    Lk = jnp.array(Lk)
     left_edge = _set_left_edge(left_edge, axes, Lk)
 
-    V = np.product(Lk)
-    dk = np.array(Lk) / np.array(N)
-    #dk = np.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
+    V = jnp.prod(Lk)
+    dk = jnp.array(Lk) / jnp.array(N)
+    #dk = jnp.array([float(lk) / float(n) for lk, n in zip(Lk, N)])
 
 
-    ft = V * ifftn(X, axes=axes) * np.sqrt(np.abs(b) / (2 * np.pi) ** (1 + a)) ** len(axes)
+    ft = V * ifftn(X, axes=axes) * jnp.sqrt(jnp.abs(b) / (2 * jnp.pi) ** (1 + a)) ** len(axes)
     ft = ifftshift(ft, axes=axes)
 
     #freq = [fftfreq(n, d=d, b=b) for n, d in zip(N, dk)]
     if freq is None:
       _myfreq = lambda n,d: fftfreq(n, d=d, b=b)
-      freq = jax.tree_multimap(_myfreq, list(N), list(dk))
+      freq = jax.tree_util.tree_map(_myfreq, list(N), list(dk))
 
 
     ft = _adjust_phase(ft, left_edge, freq, axes, -b)
@@ -195,7 +195,7 @@ def ifft(X, Lk=None, L=None, freq=None, a=0, b=2 * np.pi, axes=None, left_edge=N
 
 def _adjust_phase(ft, left_edge, freq, axes, b):
     for i, (l, f) in enumerate(zip(left_edge, freq)):
-        xp = np.exp(-b * 1j * f * l)
+        xp = jnp.exp(-b * 1j * f * l)
         obj = tuple([None] * axes[i]) + (slice(None, None, None),) + tuple([None] * (ft.ndim - axes[i] - 1))
         ft *= xp[obj]
     return ft
@@ -205,7 +205,7 @@ def _set_left_edge(left_edge, axes, L):
     if left_edge is None:
         left_edge = [-l/2. for l in L]
     else:
-        if np.isscalar(left_edge):
+        if jnp.isscalar(left_edge):
             left_edge = [left_edge] * len(axes)
         else:
             assert len(left_edge) == len(axes)
@@ -219,9 +219,9 @@ def _retfunc(ft, freq, axes, ret_cubegrid):
     else:
         grid = freq[0] ** 2
         for i in range(1, len(axes)):
-            grid = np.outer(grid, freq[i] ** 2)
+            grid = jnp.outer(grid, freq[i] ** 2)
 
-        return ft, freq, np.sqrt(grid)
+        return ft, freq, jnp.sqrt(grid)
 
 
 def fftshift(x, *args, **kwargs):
@@ -251,7 +251,7 @@ def ifftshift(x, *args, **kwargs):
         return out
 
 
-def fftfreq(N, d=1.0, b=2 * np.pi):
+def fftfreq(N, d=1.0, b=2 * jnp.pi):
     """
     Return the fourier frequencies for a box with N cells, using general Fourier convention.
     Parameters
@@ -267,4 +267,4 @@ def fftfreq(N, d=1.0, b=2 * np.pi):
     freq : array
         The N symmetric frequency components of the Fourier transform. Always centred at 0.
     """
-    return fftshift(_fftfreq(N, d=d)) * (2 * np.pi / b)
+    return fftshift(_fftfreq(N, d=d)) * (2 * jnp.pi / b)

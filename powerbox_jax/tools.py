@@ -6,18 +6,19 @@ for averaging a field angularly, and generating the isotropic power spectrum.
 """
 from . import dft
 import jax
-import jax.numpy as np
+import jax.numpy as jnp
 import warnings
+import math
 
 
 def _getbins(bins, coords, log):
     mx = coords.max()
-    if not np.iterable(bins):
+    if not jnp.iterable(bins):
         if not log:
-            bins = np.linspace(coords.min(), mx, bins + 1)
+            bins = jnp.linspace(coords.min(), mx, bins + 1)
         else:
             mn = coords[coords>0].min()
-            bins = np.logspace(np.log10(mn), np.log10(mx), bins + 1)
+            bins = jnp.logspace(jnp.log10(mn), jnp.log10(mx), bins + 1)
 
     return bins
 
@@ -71,12 +72,12 @@ def angular_average(field, coords, bins, weights=1, average=True, bin_ave=True, 
     Create a 3D radial function, and average over radial bins:
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
-    >>> x = np.linspace(-5,5,128)   # Setup a grid
-    >>> X,Y,Z = np.meshgrid(x,x,x)
-    >>> r = np.sqrt(X**2+Y**2+Z**2) # Get the radial co-ordinate of grid
-    >>> field = np.exp(-r**2)       # Generate a radial field
+    >>> x = jnp.linspace(-5,5,128)   # Setup a grid
+    >>> X,Y,Z = jnp.meshgrid(x,x,x)
+    >>> r = jnp.sqrt(X**2+Y**2+Z**2) # Get the radial co-ordinate of grid
+    >>> field = jnp.exp(-r**2)       # Generate a radial field
     >>> avgfunc, bins = angular_average(field,r,bins=100)   # Call angular_average
-    >>> plt.plot(bins, np.exp(-bins**2), label="Input Function")   # Plot input function versus ang. avg.
+    >>> plt.plot(bins, jnp.exp(-bins**2), label="Input Function")   # Plot input function versus ang. avg.
     >>> plt.plot(bins, avgfunc, label="Averaged Function")
     See Also
     --------
@@ -88,7 +89,7 @@ def angular_average(field, coords, bins, weights=1, average=True, bin_ave=True, 
 
     indx, bins, sumweight = _get_binweights(coords, weights, bins, average, bin_ave=bin_ave, log_bins=log_bins)
 
-    if np.any(sumweight==0):
+    if jnp.any(sumweight==0):
         warnings.warn("One or more radial bins had no cells within it.")
 
     res = _field_average(indx, field, weights, sumweight)
@@ -102,9 +103,9 @@ def angular_average(field, coords, bins, weights=1, average=True, bin_ave=True, 
 
 def _magnitude_grid(x, dim=None):
     if dim is not None:
-        return np.sqrt(np.sum(np.array(np.meshgrid(*([x ** 2] * dim))), axis=0))
+        return jnp.sqrt(jnp.sum(jnp.array(jnp.meshgrid(*([x ** 2] * dim))), axis=0))
     else:
-        return np.sqrt(np.sum(np.array(np.meshgrid(*([X ** 2 for X in x]))), axis=0))
+        return jnp.sqrt(jnp.sum(jnp.array(jnp.meshgrid(*([X ** 2 for X in x]))), axis=0))
 
 
 def _get_binweights(coords, weights, bins, average=True, bin_ave=True, log_bins=False):
@@ -112,40 +113,40 @@ def _get_binweights(coords, weights, bins, average=True, bin_ave=True, log_bins=
     # Get a vector of bin edges
     bins = _getbins(bins, coords, log_bins)
 
-    indx = np.digitize(coords.flatten(), bins)
+    indx = jnp.digitize(coords.flatten(), bins)
 
     if average or bin_ave:
-        if not np.isscalar(weights):
+        if not jnp.isscalar(weights):
             if coords.shape != weights.shape:
                 raise ValueError("coords and weights must have the same shape!")
-            sumweights = np.bincount(indx, weights=weights.flatten(), minlength=len(bins)+1)[1:-1]
+            sumweights = jnp.bincount(indx, weights=weights.flatten(), minlength=len(bins)+1)[1:-1]
         else:
-            sumweights = np.bincount(indx, minlength=len(bins)+1)[1:-1]
+            sumweights = jnp.bincount(indx, minlength=len(bins)+1)[1:-1]
 
         if average:
             binweight = sumweights
         else:
             binweight = 1*sumweights
-            sumweights = np.ones_like(binweight)
+            sumweights = jnp.ones_like(binweight)
 
         if bin_ave:
-            bins = np.bincount(indx, weights=(weights * coords).flatten(), minlength=len(bins)+1)[1:-1] / binweight
+            bins = jnp.bincount(indx, weights=(weights * coords).flatten(), minlength=len(bins)+1)[1:-1] / binweight
 
     else:
-        sumweights = np.ones(len(bins)-1)
+        sumweights = jnp.ones(len(bins)-1)
 
     return indx, bins, sumweights
 
 
 def _field_average(indx, field, weights, sumweights):
-    if not np.isscalar(weights) and field.shape != weights.shape:
+    if not jnp.isscalar(weights) and field.shape != weights.shape:
         raise ValueError("the field and weights must have the same shape!")
 
     field = field * weights  # Leave like this because field is mutable
 
-    rl = np.bincount(indx, weights=np.real(field.flatten()), minlength=len(sumweights)+2)[1:-1] / sumweights
+    rl = jnp.bincount(indx, weights=jnp.real(field.flatten()), minlength=len(sumweights)+2)[1:-1] / sumweights
     if field.dtype.kind == "c":
-        im = 1j * np.bincount(indx, weights=np.imag(field.flatten()), minlength=len(sumweights)+2)[1:-1] / sumweights
+        im = 1j * jnp.bincount(indx, weights=jnp.imag(field.flatten()), minlength=len(sumweights)+2)[1:-1] / sumweights
     else:
         im = 0
 
@@ -158,19 +159,19 @@ def _field_variance(indx, field, average, weights, V1):
 
     # Create a full flattened array of the same shape as field, with the average in that bin.
     # We have to pad the average vector with 0s on either side to account for cells outside the bin range.
-    average_field = np.concatenate(([0],average, [0]))[indx]
+    average_field = jnp.concatenate(([0],average, [0]))[indx]
 
     # Create the V2 array
-    if not np.isscalar(weights):
+    if not jnp.isscalar(weights):
         weights = weights.flatten()
-        V2 = np.bincount(indx, weights=weights**2, minlength=len(V1)+2)[1:-1]
+        V2 = jnp.bincount(indx, weights=weights**2, minlength=len(V1)+2)[1:-1]
     else:
         V2 = V1
 
     field = (field.flatten()-average_field)**2 * weights
 
     # This res is the estimated variance of each cell in the bin
-    res = np.bincount(indx, weights=field, minlength=len(V1)+2)[1:-1] / (V1 - V2/V1)
+    res = jnp.bincount(indx, weights=field, minlength=len(V1)+2)[1:-1] / (V1 - V2/V1)
 
     # Modify to the estimated variance of the sum of the cells in the bin.
     res *= V2 / V1**2
@@ -229,20 +230,20 @@ def angular_average_nd(field, coords, bins, n=None, weights=1, average=True, bin
     Create a 3D radial function, and average over radial bins. Equivalent to calling :func:`angular_average`:
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
-    >>> x = np.linspace(-5,5,128)   # Setup a grid
-    >>> X,Y,Z = np.meshgrid(x,x,x)  # ""
-    >>> r = np.sqrt(X**2+Y**2+Z**2) # Get the radial co-ordinate of grid
-    >>> field = np.exp(-r**2)       # Generate a radial field
+    >>> x = jnp.linspace(-5,5,128)   # Setup a grid
+    >>> X,Y,Z = jnp.meshgrid(x,x,x)  # ""
+    >>> r = jnp.sqrt(X**2+Y**2+Z**2) # Get the radial co-ordinate of grid
+    >>> field = jnp.exp(-r**2)       # Generate a radial field
     >>> avgfunc, bins, _ = angular_average_nd(field,[x,x,x],bins=100)   # Call angular_average
-    >>> plt.plot(bins, np.exp(-bins**2), label="Input Function")   # Plot input function versus ang. avg.
+    >>> plt.plot(bins, jnp.exp(-bins**2), label="Input Function")   # Plot input function versus ang. avg.
     >>> plt.plot(bins, avgfunc, label="Averaged Function")
     Create a 2D radial function, extended to 3D, and average over first 2 dimensions (cylindrical average):
 
-    >>> r = np.sqrt(X**2+Y**2)
-    >>> field = np.exp(-r**2)    # 2D field
-    >>> field = np.repeat(field,len(x)).reshape((len(x),)*3)   # Extended to 3D
+    >>> r = jnp.sqrt(X**2+Y**2)
+    >>> field = jnp.exp(-r**2)    # 2D field
+    >>> field = jnp.repeat(field,len(x)).reshape((len(x),)*3)   # Extended to 3D
     >>> avgfunc, avbins, coords = angular_average_nd(field, [x,x,x], bins=50, n=2)
-    >>> plt.plot(avbins, np.exp(-avbins**2), label="Input Function")
+    >>> plt.plot(avbins, jnp.exp(-avbins**2), label="Input Function")
     >>> plt.plot(avbins, avgfunc[:,0], label="Averaged Function")
     """
     if n is None:
@@ -258,23 +259,19 @@ def angular_average_nd(field, coords, bins, n=None, weights=1, average=True, bin
 
     indx, bins, sumweights = _get_binweights(coords, weights, bins, average, bin_ave=bin_ave, log_bins=log_bins)
 
-    n1 = np.product(field.shape[:n])
-    n2 = np.product(field.shape[n:])
+    n1 = math.prod(field.shape[:n])
+    n2 = math.prod(field.shape[n:])
 
-    res = np.zeros((len(sumweights), n2), dtype=field.dtype)
+    reshaped = field.reshape((n1, n2)).T
+
+    try:
+        w = weights.flatten()
+    except AttributeError:
+        w = weights
+
+    res = jax.vmap(lambda fld: _field_average(indx, fld, w, sumweights))(reshaped).T
     if get_variance:
-        var = np.zeros_like(res)
-
-    for i, fld in enumerate(field.reshape((n1, n2)).T):
-        try:
-            w = weights.flatten()
-        except AttributeError:
-            w = weights
-
-        res[:, i] = _field_average(indx, fld, w, sumweights)
-
-        if get_variance:
-            var[:, i] = _field_variance(indx, fld, res[:,i], w, sumweights)
+        var = jax.vmap(lambda fld, fld_res: _field_variance(indx, fld, fld_res, w, sumweights))(reshaped, res.T).T
 
     if not get_variance:
         return res.reshape((len(sumweights),) + field.shape[n:]), bins
@@ -377,12 +374,12 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
         if deltax2 is not None and dim != deltax2.shape[1]:
             raise ValueError("deltax and deltax2 must have the same number of dimensions!")
 
-        if not np.iterable(N):
+        if not jnp.iterable(N):
             N = [N] * dim
         
-        N = np.array(N)
+        N = jnp.array(N)
 
-        boxlength = np.array(boxlength)
+        boxlength = jnp.array(boxlength)
 
         Npart1 = deltax.shape[0]
 
@@ -392,22 +389,22 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
             Npart2 = Npart1
 
         # Generate a histogram of the data, with appropriate number of bins.
-        edges = [np.linspace(0, L, n + 1) for L, n in zip(boxlength, N)]
+        edges = [jnp.linspace(0, L, n + 1) for L, n in zip(boxlength, N)]
 
-        deltax = np.histogramdd(deltax % boxlength, bins=edges, weights=weights)[0].astype("float")
+        deltax = jnp.histogramdd(deltax % boxlength, bins=edges, weights=weights)[0].astype("float")
 
         if deltax2 is not None:
-            deltax2 = np.histogramdd(deltax2 % boxlength, bins=edges, weights=weights2)[0].astype("float")
+            deltax2 = jnp.histogramdd(deltax2 % boxlength, bins=edges, weights=weights2)[0].astype("float")
 
         # Convert sampled data to mean-zero data
         if dimensionless:
-            deltax = deltax / np.mean(deltax) - 1
+            deltax = deltax / jnp.mean(deltax) - 1
             if deltax2 is not None:
-                deltax2 = deltax2 / np.mean(deltax2) - 1
+                deltax2 = deltax2 / jnp.mean(deltax2) - 1
         else:
-            deltax -= np.mean(deltax)
+            deltax -= jnp.mean(deltax)
             if deltax2 is not None:
-                deltax2 -= np.mean(deltax2)
+                deltax2 -= jnp.mean(deltax2)
     else:
         # If input data is already a density field, just get the dimensions.
         if dim is None:
@@ -415,17 +412,17 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
         else:
             dim = dim
 
-        if not np.iterable(boxlength):
+        if not jnp.iterable(boxlength):
             boxlength = [boxlength] * dim
 
         if deltax2 is not None and deltax.shape != deltax2.shape:
             raise ValueError("deltax and deltax2 must have the same shape!")
 
         if N is None:
-            N = np.array(deltax.shape)
+            N = jnp.array(deltax.shape)
         Npart1 = None
 
-    V = np.product(boxlength)
+    V = jnp.prod(boxlength)
 
     # Calculate the n-D power spectrum and align it with the k from powerbox.
     FT, freq, k = dft.fft(deltax, L=boxlength, freq=freq, a=a, b=b, ret_cubegrid=True)
@@ -435,7 +432,7 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
     else:
         FT2 = FT
 
-    P = np.real(FT * np.conj(FT2) / V ** 2)
+    P = jnp.real(FT * jnp.conj(FT2) / V ** 2)
 
     if vol_normalised_power:
         P *= V
@@ -445,15 +442,15 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
 
     # Determine a nice number of bins.
     if bins is None:
-        bins = (np.product(N[:res_ndim]) ** (1. / res_ndim) / 2.2).astype(int)
+        bins = (jnp.prod(N[:res_ndim]) ** (1. / res_ndim) / 2.2).astype(int)
 
     # Set k_weights so that k=0 mode is ignore if desired.
     if ignore_zero_mode:
         kmag = _magnitude_grid([c for i, c in enumerate(freq) if i < res_ndim])
-        if np.isscalar(k_weights):
-            k_weights = np.ones_like(kmag)
+        if jnp.isscalar(k_weights):
+            k_weights = jnp.ones_like(kmag)
 
-        k_weights[kmag == 0] = 0
+        k_weights = k_weights.at[kmag == 0].set(0)
 
     # res is (P, k, <var>)
     res = angular_average_nd(P, freq, bins, n=res_ndim, bin_ave=bin_ave, get_variance=get_variance, log_bins=log_bins,
@@ -461,7 +458,7 @@ def get_power(deltax, boxlength, N=None, dim=2, deltax2=None, Ndiscrete=None, fr
     res = list(res)
     # Remove shot-noise
     if remove_shotnoise and Npart1:
-        res[0] -= np.sqrt(V ** 2 / Npart1 / Npart2)
+        res[0] -= jnp.sqrt(V ** 2 / Npart1 / Npart2)
 
     if res_ndim < dim:
         return res + [freq[res_ndim:]]
